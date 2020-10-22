@@ -9,6 +9,6 @@
 //**************************************************************************
 #define SERVER_IP "192.168.1.103"
 #define SERVER_PORT 3501
-// Note: The 555 is the currently hard-coded patient id.
+// Note: The 555 is the currently hard-coded device id. The server will use this unique number to tie to a patient.
 #define SERVER_PATH "/v1/patientData/555"
 #define SERVER_AUTH ""

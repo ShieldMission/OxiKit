@@ -14,6 +14,12 @@ unsigned long lastWiFiLoopTime = 0;
 
 void wiFiConnectionHandlerLoop()
 {
+
+  if(gWifiIsActive == false)
+  {
+    return;
+  }
+
   unsigned long curTime = millis();
   // Run this loop every 3 seconds.
   if ((curTime - lastWiFiLoopTime) > 3000)
@@ -23,6 +29,11 @@ void wiFiConnectionHandlerLoop()
     long rssi = WiFi.RSSI();
     Log.trace("RSSI %d", rssi);
   }
+}
+
+void stopWifi()
+{
+  WiFi.end();
 }
 
 // Private Functions

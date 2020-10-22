@@ -47,12 +47,27 @@ BLECharacteristic pulseOxCharacteristic;
 void btlePeripheralHandlerLoop()
 {
   unsigned long curTime = millis();
+
+  if(gBluetoothIsActive == false)
+  {
+    return;
+  }
+
   // Run this loop every x seconds, where x is variable (currentLoopDelay) depending on what state we are in
   if ((curTime - lastBtleCallingLoopTime) > currentLoopDelay)
   {
     lastBtleCallingLoopTime = curTime;
     btleThreadWorker();
   }
+}
+
+
+void stopBluetooth()
+{
+  BLE.stopScan();
+  BLE.disconnect();  // In our case without this disconnect, seems like BT would not connect the next round after Wifi.. Idea from here: https://forum.arduino.cc/index.php?topic=657710.msg4507548#msg4507548
+  BLE.end();
+  iDeviceState = DEVICE_STATE_NOT_SETUP;
 }
 
 // Private Functions
@@ -143,20 +158,19 @@ void btleSetup()
 void startScan()
 {
   Log.trace("starting BLE scan");
-  BLE.scan();
+  BLE.disconnect();
+  BLE.scan(true);
   iDeviceState = DEVICE_STATE_SCANNING;
 }
 
 bool scanDeviceHandler()
 {
-
   Log.trace("-------scanDeviceHandler----------");
   peripheral = BLE.available();
   if (peripheral)
   {
     // discovered a peripheral, print out address, local name, and advertised service
-    Log.trace("BTLE Found Address:%s  Name:%s   Adv Service UUID:%s", peripheral.address(), peripheral.localName(), peripheral.advertisedServiceUuid());
-
+    Log.trace("BTLE Found Address:%s  Name:%s   Adv Service UUID:%s", peripheral.address().c_str(), peripheral.localName().c_str(), peripheral.advertisedServiceUuid().c_str());
     // The Jumper BTLE device proivdes a service UUID in the advertisement, so look for that.
     if (peripheral.advertisedServiceUuid() == "cdeacb80-5235-4c07-8846-93a37ee6b86d")
     {
@@ -283,7 +297,7 @@ bool monitorJumperPulseOx()
         unsigned int pi = buffer[3];
         if (pulse < 255 && O2 < 127)
         {
-          Log.trace("BTLE Data Found. Pulse:%d, O2:%d, PI:%d", pulse, O2, pi);
+          Log.trace("JUMPER BTLE Data Found. Pulse:%d, O2:%d, PI:%d", pulse, O2, pi);
           gotReadingsFromDevice(O2, pulse, pi);
         }
       }
@@ -359,7 +373,7 @@ bool monitorBerryMedPulseOx()
         unsigned int pi = buffer[1] & 0x0f * 10; // Doing a x10 to make it match the same as the jumper PI result where jumper gets down to the first decimal 10.5 and is represented via 105.
         if (O2 < 127)
         {
-          Log.trace("BTLE Data Found. Pulse:%d, O2:%d, PI:%d", pulse, O2, pi);
+          Log.trace("BERRY MED BTLE Data Found. Pulse:%d, O2:%d, PI:%d", pulse, O2, pi);
           gotReadingsFromDevice(O2, pulse, pi);
         }
       }
