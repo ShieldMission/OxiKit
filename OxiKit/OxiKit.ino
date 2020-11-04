@@ -81,7 +81,7 @@ void loop()
 
   // Scan for, connect to and read any known BTLE peripherals
   // Goal is to find advertising BTLE peripherals and connect to them and collect their readings
-  btlePeripheralHandlerLoop(); // TODO Note: Currently commented out because there is some bug that when used with wiFiConnectionHandlerLoop above, the system crashes/stops.
+  btlePeripheralHandlerLoop();
 
   // Manage OxiKit Hardware
   // Goal is to keep the OixKit device running using the various IO on this arduino.
